@@ -6,6 +6,8 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/OpenDiablo2/HellSpawner/hswindows"
+
 	"github.com/golang-ui/nuklear/nk"
 	"github.com/xlab/closer"
 
@@ -21,6 +23,8 @@ const (
 func init() {
 	runtime.LockOSThread()
 }
+
+var mainWindow hswindows.MainWindow
 
 func main() {
 	if err := glfw.Init(); err != nil {
@@ -41,12 +45,12 @@ func main() {
 	}
 	gl.Viewport(0, 0, int32(width), int32(height))
 	ctx := nk.NkPlatformInit(win, nk.PlatformInstallCallbacks)
-
 	atlas := nk.NewFontAtlas()
 	nk.NkFontStashBegin(&atlas)
-	sansFont := nk.NkFontAtlasAddFromFile(atlas, "Cascadia.ttf", 17, nil)
-	config := nk.NkFontConfig(17)
-	config.SetOversample(0, 0)
+	sansFont := nk.NkFontAtlasAddFromFile(atlas, "Roboto-Regular.ttf", 18, nil)
+	config := nk.NkFontConfig(18)
+	config.SetPixelSnap(false)
+	config.SetOversample(4, 4)
 	//config.SetRange(nk.NkFontChineseGlyphRanges())
 	// simsunFont := nk.NkFontAtlasAddFromFile(atlas, "/Library/Fonts/Microsoft/SimHei.ttf", 14, &config)
 	nk.NkFontStashEnd()
@@ -62,10 +66,11 @@ func main() {
 	})
 
 	state := &State{
-		bgColor: nk.NkRgba(10, 10, 10, 255),
+		bgColor: nk.NkRgba(20, 20, 20, 255),
 	}
 
 	fpsTicker := time.NewTicker(time.Second / 30)
+	mainWindow = hswindows.CreateMainWindow()
 	for {
 		select {
 		case <-exitC:
@@ -86,24 +91,10 @@ func main() {
 }
 
 func gfxMain(win *glfw.Window, ctx *nk.Context, state *State) {
-	width, height := win.GetSize()
 	nk.NkPlatformNewFrame()
-	bounds := nk.NkRect(0, 0, float32(width), 32)
-	if nk.NkBegin(ctx, "Bla", bounds, nk.WindowNoScrollbar|nk.WindowBackground) > 0 {
-		nk.NkMenubarBegin(ctx)
-		nk.NkLayoutRowBegin(ctx, nk.LayoutStaticRow, 25, 3)
-		nk.NkLayoutRowPush(ctx, 45)
-		if nk.NkMenuBeginLabel(ctx, "File", nk.TextAlignLeft, nk.NkVec2(120, 200)) > 0 {
-			nk.NkLayoutRowDynamic(ctx, 25, 1)
-			if nk.NkMenuItemLabel(ctx, "Quit", nk.TextAlignLeft) > 0 {
-				win.SetShouldClose(true)
-			}
-			nk.NkMenuEnd(ctx)
-		}
-		nk.NkMenubarEnd(ctx)
-	}
-	nk.NkEnd(ctx)
+	mainWindow.Render(win, ctx)
 	// Render
+	width, height := win.GetSize()
 	bg := make([]float32, 4)
 	nk.NkColorFv(bg, state.bgColor)
 	gl.Viewport(0, 0, int32(width), int32(height))
