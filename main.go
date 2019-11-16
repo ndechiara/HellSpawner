@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/OpenDiablo2/HellSpawner/hswindows"
+	"github.com/OpenDiablo2/HellSpawner/hsproj"
 
 	"github.com/golang-ui/nuklear/nk"
 	"github.com/xlab/closer"
@@ -26,7 +27,12 @@ func init() {
 
 var mainWindow hswindows.MainWindow
 
+
+
 func main() {
+	// init project state to an empty state
+	hsproj.SetDefaultActiveProject()
+
 	if err := glfw.Init(); err != nil {
 		closer.Fatalln(err)
 	}
