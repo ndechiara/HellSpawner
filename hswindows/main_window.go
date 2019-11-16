@@ -1,6 +1,9 @@
 package hswindows
 
 import (
+	"github.com/OpenDiablo2/HellSpawner/hsproj"
+	"github.com/OpenDiablo2/HellSpawner/hsutil"
+
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/golang-ui/nuklear/nk"
 )
@@ -28,6 +31,15 @@ func (v *MainWindow) Render(win *glfw.Window, ctx *nk.Context) {
 			nk.NkLayoutRowDynamic(ctx, 25, 1)
 			if nk.NkMenuItemLabel(ctx, "Open Project Folder...", nk.TextAlignLeft) > 0 {
 				v.openProjectDialog.Show(ctx)
+			}
+			if nk.NkMenuItemLabel(ctx, "Save", nk.TextAlignLeft) > 0 {
+				err := hsproj.ActiveProject.Save()
+				if err != nil {
+					hsutil.PopupError(err)
+				}
+			}
+			if nk.NkMenuItemLabel(ctx, "Save As", nk.TextAlignLeft) > 0 {
+				// TODO
 			}
 			if nk.NkMenuItemLabel(ctx, "Quit", nk.TextAlignLeft) > 0 {
 				win.SetShouldClose(true)

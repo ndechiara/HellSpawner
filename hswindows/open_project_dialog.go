@@ -5,6 +5,9 @@ import (
 	"os"
 	"path"
 
+	"github.com/OpenDiablo2/HellSpawner/hsproj"
+	"github.com/OpenDiablo2/HellSpawner/hsutil"
+
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/golang-ui/nuklear/nk"
 )
@@ -54,6 +57,21 @@ func (v *OpenProjectDialog) Render(win *glfw.Window, ctx *nk.Context) {
 				v.RefreshDirs()
 			}
 		}
+		if nk.NkButtonLabel(ctx, "[Okay]") > 0 {
+			hsproj.ActiveProject.PromptUnsavedChanges()
+			hsproj.ActiveProject.Close()
+
+			newproj, err := hsproj.LoadProjectStateFromFolder(v.currentDir)
+			if err != nil {
+				hsutil.PopupError(err)
+				return
+			}
+
+			hsproj.ActiveProject = newproj
+			v.visible = false
+		}
+	} else {
+		v.visible = false
 	}
 	nk.NkEnd(ctx)
 }
