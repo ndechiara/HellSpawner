@@ -5,6 +5,7 @@ package main
 import (
 	"runtime"
 	"time"
+	"log"
 
 	"github.com/OpenDiablo2/HellSpawner/hswindows"
 	"github.com/OpenDiablo2/HellSpawner/hsproj"
@@ -30,6 +31,7 @@ var mainWindow hswindows.MainWindow
 
 
 func main() {
+	log.Println("Launching HellSpawner")
 	// init project state to an empty state
 	hsproj.SetDefaultActiveProject()
 
