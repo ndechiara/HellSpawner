@@ -9,6 +9,7 @@ import (
 
 	"github.com/OpenDiablo2/HellSpawner/hswindows"
 	"github.com/OpenDiablo2/HellSpawner/hsproj"
+	"github.com/OpenDiablo2/HellSpawner/hsutil"
 
 	"github.com/golang-ui/nuklear/nk"
 	"github.com/xlab/closer"
@@ -17,12 +18,15 @@ import (
 	"github.com/go-gl/glfw/v3.2/glfw"
 
 	"github.com/OpenDiablo2/D2Shared/d2data/d2mpq"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 const (
 	maxVertexBuffer  = 512 * 1024
 	maxElementBuffer = 128 * 1024
 )
+
+var path = kingpin.Arg("path", "Project path").String()
 
 func init() {
 	runtime.LockOSThread()
@@ -41,6 +45,7 @@ var (
 )
 
 func main() {
+	kingpin.Parse()
 	// startup GLFW 
 	// (don't let anything come before this)
 	if err := glfw.Init(); err != nil {
@@ -98,6 +103,20 @@ func main() {
 
 	fpsTicker := time.NewTicker(time.Second / 30)
 	mainWindow = hswindows.CreateMainWindow()
+
+	if *path != "" {
+		hsproj.ActiveProject.PromptUnsavedChanges()
+		hsproj.ActiveProject.Close()
+
+		newproj, err := hsproj.LoadProjectStateFromFolder(*path)
+		if err != nil {
+			hsutil.PopupError(err)
+			return
+		}
+
+		hsproj.ActiveProject = newproj
+	}
+
 	for {
 		select {
 		case <-exitC:
