@@ -66,6 +66,18 @@ func main() {
 	hsproj.SetDefaultActiveProject()
 	// init cryptographic tables
 	d2mpq.InitializeCryptoBuffer()
+	// if a path was passed in, load that project
+	if *path != "" {
+		hsproj.ActiveProject.PromptUnsavedChanges()
+		hsproj.ActiveProject.Close()
+
+		newproj, err := hsproj.LoadProjectStateFromFolder(*path)
+		if err != nil {
+			hsutil.PopupError(err)
+		} else {
+			hsproj.ActiveProject = newproj
+		}
+	}
 
 	// finish UI init
 	win.MakeContextCurrent()
@@ -103,19 +115,6 @@ func main() {
 
 	fpsTicker := time.NewTicker(time.Second / 30)
 	mainWindow = hswindows.CreateMainWindow()
-
-	if *path != "" {
-		hsproj.ActiveProject.PromptUnsavedChanges()
-		hsproj.ActiveProject.Close()
-
-		newproj, err := hsproj.LoadProjectStateFromFolder(*path)
-		if err != nil {
-			hsutil.PopupError(err)
-			return
-		}
-
-		hsproj.ActiveProject = newproj
-	}
 
 	for {
 		select {
