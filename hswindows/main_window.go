@@ -11,13 +11,24 @@ import (
 type MainWindow struct {
 	aboutDialog       AboutDialog
 	openProjectDialog OpenProjectDialog
+
+	mpqTreeDialog *MpqTreeDialog
 }
 
 func CreateMainWindow() MainWindow {
 	result := MainWindow{}
+	result.mpqTreeDialog = CreateMpqTreeDialog()
+
 	result.aboutDialog = CreateAboutDialog()
-	result.openProjectDialog = CreateOpenProjectDialog()
+	result.openProjectDialog = CreateOpenProjectDialog(func() {
+		// callback when a new project is loaded
+		result.Refresh()
+	})
 	return result
+}
+
+func (v *MainWindow) Refresh(){
+	v.mpqTreeDialog.Refresh()
 }
 
 func (v *MainWindow) Render(win *glfw.Window, ctx *nk.Context) {
@@ -54,8 +65,14 @@ func (v *MainWindow) Render(win *glfw.Window, ctx *nk.Context) {
 			nk.NkMenuEnd(ctx)
 		}
 		nk.NkMenubarEnd(ctx)
+
+		// tree view
+		
 	}
 	nk.NkEnd(ctx)
+	v.mpqTreeDialog.Render(win, ctx)
+
+	// popups
 	v.aboutDialog.Render(win, ctx)
 	v.openProjectDialog.Render(win, ctx)
 }

@@ -16,11 +16,13 @@ type OpenProjectDialog struct {
 	visible     bool
 	currentDir  string
 	directories []os.FileInfo
+	loaded      func()
 }
 
-func CreateOpenProjectDialog() OpenProjectDialog {
+func CreateOpenProjectDialog(callback func()) OpenProjectDialog {
 	result := OpenProjectDialog{}
 	result.currentDir, _ = os.UserHomeDir()
+	result.loaded = callback
 	result.RefreshDirs()
 	return result
 }
@@ -69,6 +71,7 @@ func (v *OpenProjectDialog) Render(win *glfw.Window, ctx *nk.Context) {
 
 			hsproj.ActiveProject = newproj
 			v.visible = false
+			v.loaded()
 		}
 	} else {
 		v.visible = false
