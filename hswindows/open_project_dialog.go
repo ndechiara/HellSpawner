@@ -16,11 +16,13 @@ type OpenProjectDialog struct {
 	visible     bool
 	currentDir  string
 	directories []os.FileInfo
+	loaded      func()
 }
 
-func CreateOpenProjectDialog() OpenProjectDialog {
+func CreateOpenProjectDialog(callback func()) OpenProjectDialog {
 	result := OpenProjectDialog{}
 	result.currentDir, _ = os.UserHomeDir()
+	result.loaded = callback
 	result.RefreshDirs()
 	return result
 }
@@ -41,7 +43,7 @@ func (v *OpenProjectDialog) Render(win *glfw.Window, ctx *nk.Context) {
 	dialogHeight := 300
 	width, height := win.GetSize()
 	bounds := nk.NkRect(float32((width/2)-(dialogWidth/2)), float32((height/2)-(dialogHeight/2)), float32(dialogWidth), float32(dialogHeight))
-	if nk.NkBegin(ctx, "Open Project", bounds, nk.WindowClosable|nk.WindowBorder|nk.WindowMovable|nk.WindowBackground) > 0 {
+	if nk.NkBegin(ctx, "Open Project", bounds, nk.WindowClosable|nk.WindowBorder|nk.WindowMovable) > 0 {
 		nk.NkLayoutRowDynamic(ctx, 18, 1)
 		if nk.NkButtonLabel(ctx, "[Go up a folder]") > 0 {
 			v.currentDir = path.Join(v.currentDir, "..")
@@ -69,6 +71,7 @@ func (v *OpenProjectDialog) Render(win *glfw.Window, ctx *nk.Context) {
 
 			hsproj.ActiveProject = newproj
 			v.visible = false
+			v.loaded()
 		}
 	} else {
 		v.visible = false
