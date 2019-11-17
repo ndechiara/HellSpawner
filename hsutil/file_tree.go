@@ -13,7 +13,7 @@ type FileTreeNode struct {
 	Children []*FileTreeNode
 }
 
-func BuildTreeWalk(curnode *FileTreeNode, curpath []string, fullpath string) {
+func BuildTreeWalk(curnode *FileTreeNode, curpath []string, fullpath string, prevpaths string) {
 	if len(curpath) == 0 {
 		return
 	}
@@ -21,11 +21,12 @@ func BuildTreeWalk(curnode *FileTreeNode, curpath []string, fullpath string) {
 	// take the next bit off curpath
 	var next string
 	next, curpath = curpath[0], curpath[1:]
+	prevpaths = prevpaths + "\\" + next
 
 	// see if next already exists
 	for _, node := range curnode.Children {
 		if strings.ToLower(node.Name) == strings.ToLower(next) {
-			BuildTreeWalk(node, curpath, fullpath) // node already exists, keep walking
+			BuildTreeWalk(node, curpath, fullpath, prevpaths) // node already exists, keep walking
 			return
 		}
 	}
@@ -62,7 +63,8 @@ func BuildTreeWalk(curnode *FileTreeNode, curpath []string, fullpath string) {
 	if newnode.IsFile { // if it's a file, stop
 		newnode.FullPath = fullpath
 	} else { // otherwise, keep walking
-		BuildTreeWalk(newnode, curpath, fullpath)
+		newnode.FullPath = prevpaths
+		BuildTreeWalk(newnode, curpath, fullpath, prevpaths)
 	}
 }
 
@@ -73,7 +75,7 @@ func BuildFileTreeFromFileList(paths []string) *FileTreeNode {
 	
 	for _, p := range paths {
 		pnames := strings.Split(p, string("\\"))
-		BuildTreeWalk(root, pnames, p)
+		BuildTreeWalk(root, pnames, p, "")
 	}
 
 	return root

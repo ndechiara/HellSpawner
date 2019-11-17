@@ -68,7 +68,7 @@ func (v *OpenProjectDialog) Render(win *glfw.Window, ctx *nk.Context) {
 				hsutil.PopupError(err)
 				return
 			}
-
+			
 			hsproj.ActiveProject = newproj
 			v.visible = false
 			v.loaded()
