@@ -151,7 +151,7 @@ func (v *MpqTreeDialog) RenderTree(ctx *nk.Context, node *hsutil.FileTreeNode) {
 			// do something when file is selected
 		}
 	} else {
-		if nk.NkTreePushHashed(ctx, nk.TreeTab, node.Name, nk.Minimized, node.Name, int32(len(node.Name)), 0) > 0 {
+		if nk.NkTreePushHashed(ctx, nk.TreeTab, node.Name, nk.Minimized, node.FullPath, int32(len(node.Name)), 0) > 0 {
 			for _, c := range node.Children {
 				v.RenderTree(ctx, c)
 			}
