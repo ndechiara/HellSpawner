@@ -1,7 +1,6 @@
 package hsutil
 
 import (
-	"path/filepath"
 	"strings"
 )
 
@@ -73,7 +72,7 @@ func BuildFileTreeFromFileList(paths []string) *FileTreeNode {
 	root.Children = make([]*FileTreeNode, 0)
 	
 	for _, p := range paths {
-		pnames := strings.Split(p, string(filepath.Separator))
+		pnames := strings.Split(p, string("\\"))
 		BuildTreeWalk(root, pnames, p)
 	}
 
