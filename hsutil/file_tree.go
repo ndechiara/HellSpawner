@@ -32,10 +32,32 @@ func BuildTreeWalk(curnode *FileTreeNode, curpath []string, fullpath string) {
 	}
 
 	// otherwise, add it
+	isfile := len(curpath) == 0
+	// find the index to add at
+	// this logic ensures that dirs are on top of the list and files are on the bottom
+	index := -1
+	if !isfile {
+		for i, node := range curnode.Children {
+			if !isfile && node.IsFile {
+				index = i
+				break
+			}
+		}
+	}
+
 	newnode := &FileTreeNode{}
-	curnode.Children = append(curnode.Children, newnode)
+	if index == -1 {
+		// if index is -1, it's a file or its a dir and we searched the whole list and found no files
+		// so append it to the end
+		curnode.Children = append(curnode.Children, newnode)
+	} else {
+		// insert the new node at a specific index
+		curnode.Children = append(curnode.Children, nil)
+		copy(curnode.Children[index + 1:], curnode.Children[index:])
+		curnode.Children[index] = newnode
+	}
 	newnode.Name = next
-	newnode.IsFile = len(curpath) == 0
+	newnode.IsFile = isfile
 	newnode.Children = make([]*FileTreeNode, 0) 
 	if newnode.IsFile { // if it's a file, stop
 		newnode.FullPath = fullpath

@@ -31,10 +31,14 @@ func (v *MainWindow) Refresh(){
 	v.mpqTreeDialog.Refresh()
 }
 
+var (
+	MenuBarRowHeight int = 32
+)
+
 func (v *MainWindow) Render(win *glfw.Window, ctx *nk.Context) {
 	width, _ := win.GetSize()
 	bounds := nk.NkRect(0, 0, float32(width), 32)
-	if nk.NkBegin(ctx, "Bla", bounds, nk.WindowNoScrollbar|nk.WindowBackground) > 0 {
+	if nk.NkBegin(ctx, "Bla", bounds, nk.WindowNoScrollbar) > 0 {
 		nk.NkMenubarBegin(ctx)
 		nk.NkLayoutRowBegin(ctx, nk.LayoutStaticRow, 25, 3)
 		nk.NkLayoutRowPush(ctx, 45)
@@ -65,11 +69,10 @@ func (v *MainWindow) Render(win *glfw.Window, ctx *nk.Context) {
 			nk.NkMenuEnd(ctx)
 		}
 		nk.NkMenubarEnd(ctx)
-
-		// tree view
-		
 	}
 	nk.NkEnd(ctx)
+
+	// tree view
 	v.mpqTreeDialog.Render(win, ctx)
 
 	// popups
