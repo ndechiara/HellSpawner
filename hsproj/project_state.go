@@ -175,4 +175,5 @@ func (s *ProjectState) Rename(newname string) error {
 
 func (s *ProjectState) Close() {
 	// discard the project
+	s.Loaded = false
 }
