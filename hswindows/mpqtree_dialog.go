@@ -31,6 +31,14 @@ type MpqTreeIcons struct {
 	unknownTex *hsutil.Texture
 	Txt        *nk.Image
 	txtTex     *hsutil.Texture
+	Bin        *nk.Image
+	binTex     *hsutil.Texture
+	Dcc        *nk.Image
+	dccTex     *hsutil.Texture
+	Dc6        *nk.Image
+	dc6Tex     *hsutil.Texture
+	Ds1        *nk.Image
+	ds1Tex     *hsutil.Texture
 }
 
 func CreateMpqTreeDialog() *MpqTreeDialog {
@@ -48,6 +56,10 @@ func CreateMpqTreeIcons() *MpqTreeIcons {
 	icons := MpqTreeIcons{}
 	icons.unknownTex, icons.Unknown = icons.loadImage(filepath.Join("icons","mpqtree_unknown.png"))
 	icons.txtTex, icons.Txt = icons.loadImage(filepath.Join("icons","mpqtree_txt.png"))
+	icons.binTex, icons.Bin = icons.loadImage(filepath.Join("icons","mpqtree_bin.png"))
+	icons.dccTex, icons.Dcc = icons.loadImage(filepath.Join("icons","mpqtree_dcc.png"))
+	icons.dc6Tex, icons.Dc6 = icons.loadImage(filepath.Join("icons","mpqtree_dc6.png"))
+	icons.ds1Tex, icons.Ds1 = icons.loadImage(filepath.Join("icons","mpqtree_ds1.png"))
 
 	return &icons
 }
@@ -68,6 +80,18 @@ func (v *MpqTreeIcons) loadImage(path string) (*hsutil.Texture, *nk.Image) {
 func (v *MpqTreeIcons) GetIcon(path string) *nk.Image {
 	if filepath.Ext(path) == ".txt" {
 		return v.Txt
+	}
+	if filepath.Ext(path) == ".bin" {
+		return v.Bin
+	}
+	if filepath.Ext(path) == ".dcc" {
+		return v.Dcc
+	}
+	if filepath.Ext(path) == ".dc6" {
+		return v.Dc6
+	}
+	if filepath.Ext(path) == ".ds1" {
+		return v.Ds1
 	}
 
 	return v.Unknown
