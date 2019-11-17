@@ -65,12 +65,7 @@ func (v *MpqList) Populate(folderpath string) error {
 			newinfo.Name = file.Name()
 
 			// now try to load the listfile
-			lf, lfErr := LoadListFile(folderpath, file.Name())
-			if lfErr != nil {
-				// couldn't load the listfile
-				lf = CreateListFileFromMpq(&newinfo)
-			}
-			newinfo.ListFile = lf
+			newinfo.ListFile = CreateListFileFromMpq(&newinfo)
 
 			v.Mpqs = append(v.Mpqs, newinfo)
 		}
@@ -124,12 +119,6 @@ func (v *MpqList) Save(folderpath string) error {
 
 func (v *MpqInfo) Save(folderpath string) error {
 	log.Printf("Saving MPQ '%s'", v.Name)
-
-	// save the listfile
-	err := v.ListFile.Save(folderpath)
-	if err != nil {
-		return err
-	}
 
 	// TODO: save the mpq data itself
 	return nil
