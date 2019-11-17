@@ -36,12 +36,13 @@ func BuildTreeWalk(curnode *FileTreeNode, curpath []string, fullpath string) {
 	// find the index to add at
 	// this logic ensures that dirs are on top of the list and files are on the bottom
 	index := -1
-	if !isfile {
-		for i, node := range curnode.Children {
-			if !isfile && node.IsFile {
-				index = i
-				break
-			}
+	for i, node := range curnode.Children {
+		if !isfile && node.IsFile || !isfile && node.Name > next {
+			index = i
+			break
+		} else if isfile && node.IsFile && node.Name > next {
+			index = i
+			break
 		}
 	}
 
