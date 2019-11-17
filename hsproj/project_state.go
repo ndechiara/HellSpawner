@@ -23,6 +23,9 @@ type ProjectState struct {
 	// state
 	Loaded         bool
 	UnsavedChanges bool
+
+	// data
+	MpqList *MpqList
 }
 
 func GetEmptyProjectState() *ProjectState {
@@ -107,7 +110,12 @@ func LoadProjectStateFromProj(projpath string) (*ProjectState, error) {
 func (s *ProjectState) postLoad() error {
 	// use this to trigger load for other parts of the project
 
-	// TODO: load mpq list
+	// load mpq list
+	mpqlist, err := LoadMpqList(s.FolderPath)
+	if err != nil {
+		return err
+	}
+	s.MpqList = mpqlist
 
 	return nil
 }
@@ -141,6 +149,9 @@ func (s *ProjectState) Save() error {
 	}
 
 	// TODO: call actual saving code for subcomponents...
+
+	// save the mpqs
+	s.MpqList.Save(s.FolderPath)
 
 	log.Printf("Project '%s' saved in '%s'", s.Name, s.FolderPath);
 	s.UnsavedChanges = false
