@@ -150,6 +150,9 @@ func (s *ProjectState) Save() error {
 
 	// TODO: call actual saving code for subcomponents...
 
+	// save the mpqs
+	s.MpqList.Save(s.FolderPath)
+
 	log.Printf("Project '%s' saved in '%s'", s.Name, s.FolderPath);
 	s.UnsavedChanges = false
 	return nil

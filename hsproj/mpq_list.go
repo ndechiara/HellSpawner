@@ -10,7 +10,7 @@ import (
 
 	"github.com/OpenDiablo2/HellSpawner/hsutil"
 
-	"github.com/OpenDiablo2/OpenDiablo2/d2data/d2mpq"
+	"github.com/OpenDiablo2/D2Shared/d2data/d2mpq"
 )
 
 type MpqList struct {
@@ -18,7 +18,8 @@ type MpqList struct {
 }
 
 type MpqInfo struct {
-	Data     *d2mpq.MPQ
+	Name     string
+	Data     *d2mpq.MPQ//*MockMPQ
 	ListFile *ListFile
 }
 
@@ -50,6 +51,9 @@ func (v *MpqList) Populate(folderpath string) error {
     for _, file := range files {
         if filepath.Ext(file.Name()) == ".mpq" {
 			newinfo := MpqInfo{}
+			// NOTE: can switch to MockMPQ by changing this line:
+			//       LoadMockMPQ(filepath.Join(folderpath, file.Name()))
+			//       d2mpq.Load(filepath.Join(folderpath, file.Name()))
 			archive, archiveErr := d2mpq.Load(filepath.Join(folderpath, file.Name()))
 			if archiveErr != nil {
 				log.Printf("Could not load MPQ '%s'", file.Name())
@@ -58,6 +62,7 @@ func (v *MpqList) Populate(folderpath string) error {
 			} 
 			log.Printf("Loaded MPQ '%s'", file.Name())
 			newinfo.Data = archive
+			newinfo.Name = file.Name()
 
 			// now try to load the listfile
 			lf, lfErr := LoadListFile(folderpath, file.Name())
@@ -75,7 +80,7 @@ func (v *MpqList) Populate(folderpath string) error {
 
 func (v *MpqList) FindMpq(mpqname string) *MpqInfo {
 	for _, m := range v.Mpqs {
-		if m.Data.FileName == mpqname {
+		if m.Name == mpqname {
 			return &m
 		}
 	}
@@ -118,6 +123,8 @@ func (v *MpqList) Save(folderpath string) error {
 }
 
 func (v *MpqInfo) Save(folderpath string) error {
+	log.Printf("Saving MPQ '%s'", v.Name)
+
 	// save the listfile
 	err := v.ListFile.Save(folderpath)
 	if err != nil {

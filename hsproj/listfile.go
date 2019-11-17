@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"io/ioutil"
+	"log"
 )
 
 type ListFile struct {
@@ -13,8 +14,8 @@ type ListFile struct {
 }
 
 type ListFilePath struct{
-	DisplayName string
-	FilePath    string
+	Name string // note: this is just for display and can be customized
+	Path string // path to the file in the mpq
 }
 
 func getListFilePath(folderpath string, mpqname string) string {
@@ -52,20 +53,23 @@ func LoadListFile(folderpath string, mpqname string) (*ListFile, error) {
 func CreateListFileFromMpq(mpq *MpqInfo) *ListFile {
 	// should return a blank one (as such) if none is found internally or if loading it errors
 	result := ListFile{}
-	result.MpqName = mpq.Data.FileName
+	result.MpqName = mpq.Name
 	result.Files = make([]ListFilePath, 0)
 
 	// if the mpq has an existing lifefile internally, convert it to our listfile format
 	names, err := mpq.Data.GetFileList()
 	if err == nil {
+		log.Printf("List file found inside MPQ '%s'", mpq.Name)
 		// found the listfile, load it in
 		for _, name := range names {
 			newlfp := ListFilePath{
-				name,
+				filepath.Base(name),
 				name,
 			}
 			result.Files = append(result.Files, newlfp)
 		}
+	} else {
+		log.Printf("List file not found inside MPQ '%s'", mpq.Name)
 	}
 
 	return &result

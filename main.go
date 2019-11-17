@@ -15,6 +15,8 @@ import (
 
 	"github.com/go-gl/gl/v3.2-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
+
+	"github.com/OpenDiablo2/D2Shared/d2data/d2mpq"
 )
 
 const (
@@ -28,13 +30,19 @@ func init() {
 
 var mainWindow hswindows.MainWindow
 
+// please see https://github.com/golang-ui/nuklear/issues/48
+// it is important that we prevent fonts / font handles from being garbage collected
+// otherwise we will see obscure "signal arrived during external code execution" panics
+// when you create a font, store it and its handle in a var as such to preven this issue
+var (
+	MainFont *nk.Font
 
+	MainFontHandle *nk.UserFont
+)
 
 func main() {
-	log.Println("Launching HellSpawner")
-	// init project state to an empty state
-	hsproj.SetDefaultActiveProject()
-
+	// startup GLFW 
+	// (don't let anything come before this)
 	if err := glfw.Init(); err != nil {
 		closer.Fatalln(err)
 	}
@@ -46,6 +54,15 @@ func main() {
 	if err != nil {
 		closer.Fatalln(err)
 	}
+
+	// handle init of non-UI components
+	log.Println("Launching HellSpawner...")
+	// init project state to an empty state
+	hsproj.SetDefaultActiveProject()
+	// init cryptographic tables
+	d2mpq.InitializeCryptoBuffer()
+
+	// finish UI init
 	win.MakeContextCurrent()
 	width, height := win.GetSize()
 	if err := gl.Init(); err != nil {
@@ -55,14 +72,16 @@ func main() {
 	ctx := nk.NkPlatformInit(win, nk.PlatformInstallCallbacks)
 	atlas := nk.NewFontAtlas()
 	nk.NkFontStashBegin(&atlas)
-	sansFont := nk.NkFontAtlasAddFromFile(atlas, "Roboto-Regular.ttf", 18, nil)
+	MainFont = nk.NkFontAtlasAddFromFile(atlas, "Roboto-Regular.ttf", 18, nil)
 	config := nk.NkFontConfig(18)
 	config.SetPixelSnap(false)
 	config.SetOversample(4, 4)
 	//config.SetRange(nk.NkFontChineseGlyphRanges())
 	// simsunFont := nk.NkFontAtlasAddFromFile(atlas, "/Library/Fonts/Microsoft/SimHei.ttf", 14, &config)
 	nk.NkFontStashEnd()
-	nk.NkStyleSetFont(ctx, sansFont.Handle())
+
+	MainFontHandle = MainFont.Handle()
+	nk.NkStyleSetFont(ctx, MainFontHandle)
 	// if simsunFont != nil {
 	// 	nk.NkStyleSetFont(ctx, simsunFont.Handle())
 	// }
