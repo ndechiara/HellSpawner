@@ -3,6 +3,7 @@ package hswindows
 import (
 	"github.com/OpenDiablo2/HellSpawner/hsproj"
 	"github.com/OpenDiablo2/HellSpawner/hsutil"
+	"github.com/OpenDiablo2/HellSpawner/hswindows/hseditors"
 
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/golang-ui/nuklear/nk"
@@ -12,12 +13,23 @@ type MainWindow struct {
 	aboutDialog       AboutDialog
 	openProjectDialog OpenProjectDialog
 
-	mpqTreeDialog *MpqTreeDialog
+	tabEditorDialog *TabEditorDialog
+	mpqTreeDialog      *MpqTreeDialog
 }
 
 func CreateMainWindow() MainWindow {
 	result := MainWindow{}
-	result.mpqTreeDialog = CreateMpqTreeDialog()
+
+	result.tabEditorDialog = CreateTabEditorDialog()
+	mpqtreesel := func(filename string, mpqpath hsutil.MpqPath){
+		// create a new editor
+		var ed hseditors.Editor
+		// for now, just default to text editor
+		ed = hseditors.CreateTextEditor(filename, mpqpath)
+
+		result.tabEditorDialog.AddEditor(&ed)
+	}
+	result.mpqTreeDialog = CreateMpqTreeDialog(&mpqtreesel)
 
 	result.aboutDialog = CreateAboutDialog()
 	result.openProjectDialog = CreateOpenProjectDialog(func() {
@@ -74,6 +86,7 @@ func (v *MainWindow) Render(win *glfw.Window, ctx *nk.Context) {
 
 	// tree view
 	v.mpqTreeDialog.Render(win, ctx)
+	v.tabEditorDialog.Render(win, ctx)
 
 	// popups
 	v.aboutDialog.Render(win, ctx)

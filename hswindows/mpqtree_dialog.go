@@ -1,9 +1,5 @@
 package hswindows
 
-// todo: display list of MPQs, when expanded display items from listfile 
-// associated with that MPQ. Allow user to add items to the listfile
-
-
 import (
 	"path/filepath"
 	"log"
@@ -23,6 +19,8 @@ type MpqTreeDialog struct {
 	SelectedName string
 	fileTree     *hsutil.FileTreeNode
 
+	SelectionCallback *func(filename string, mpqpath hsutil.MpqPath)
+
 	Icons *MpqTreeIcons
 }
 
@@ -39,10 +37,16 @@ type MpqTreeIcons struct {
 	dc6Tex     *hsutil.Texture
 	Ds1        *nk.Image
 	ds1Tex     *hsutil.Texture
+
+	Dir        *nk.Image
+	dirTex     *hsutil.Texture
+	OpenDir    *nk.Image
+	openDirTex *hsutil.Texture
 }
 
-func CreateMpqTreeDialog() *MpqTreeDialog {
+func CreateMpqTreeDialog(selectionCallback *func(filename string, mpqpath hsutil.MpqPath)) *MpqTreeDialog {
 	result := MpqTreeDialog{}
+	result.SelectionCallback = selectionCallback
 
 	// load images
 	result.Icons = CreateMpqTreeIcons()
@@ -61,6 +65,8 @@ func CreateMpqTreeIcons() *MpqTreeIcons {
 	icons.dc6Tex, icons.Dc6 = icons.loadImage(filepath.Join("icons","mpqtree_dc6.png"))
 	icons.ds1Tex, icons.Ds1 = icons.loadImage(filepath.Join("icons","mpqtree_ds1.png"))
 
+	icons.dirTex, icons.Dir = icons.loadImage(filepath.Join("icons","mpqtree_dir.png"))
+	icons.openDirTex, icons.OpenDir = icons.loadImage(filepath.Join("icons","mpqtree_opendir.png"))
 	return &icons
 }
 
@@ -129,33 +135,60 @@ func (v *MpqTreeDialog) Render(win *glfw.Window, ctx *nk.Context) {
 	bounds := nk.NkRect(1, float32(MenuBarRowHeight), float32(dialogWidth), float32(dialogHeight))
 	if nk.NkBegin(ctx, "MPQ Files", bounds, nk.WindowTitle) > 0 {
 		nk.NkLayoutRowDynamic(ctx, 12, 1)
-		v.RenderTree(ctx, v.fileTree)
+		v.RenderTree(ctx, v.fileTree, 0)
 	} else {
 		v.visible = false
 	}
 	nk.NkEnd(ctx)
 }
 
-func (v *MpqTreeDialog) RenderTree(ctx *nk.Context, node *hsutil.FileTreeNode) {
+func (v *MpqTreeDialog) RenderTree(ctx *nk.Context, node *hsutil.FileTreeNode, level int) {
 	if node == nil {
 		return
 	}
 	if node.IsFile {
 		img := v.Icons.GetIcon(node.Name)
 		nk.NkLayoutRowTemplateBegin(ctx, 18)
+		nk.NkLayoutRowTemplatePushStatic(ctx, float32(18*level) + 1)
 		nk.NkLayoutRowTemplatePushStatic(ctx, 18)
 		nk.NkLayoutRowTemplatePushVariable(ctx, 100)
 		nk.NkLayoutRowTemplateEnd(ctx)
+		nk.NkLabel(ctx, "", nk.TextAlignCentered)
 		nk.NkImage(ctx, *img)
 		if nk.NkSelectText(ctx, node.Name, int32(len(node.Name)), nk.TextLeft, 0) > 0 {
 			// do something when file is selected
+			if v.SelectionCallback != nil {
+				(*v.SelectionCallback)(node.Name, node.GetMpqPath())
+			}
 		}
 	} else {
-		if nk.NkTreePushHashed(ctx, nk.TreeTab, node.Name, nk.Minimized, node.FullPath, int32(len(node.Name)), 0) > 0 {
+		/*if nk.NkTreePushHashed(ctx, nk.TreeTab, node.Name, nk.Minimized, node.FullPath, int32(len(node.Name)), 0) > 0 {
 			for _, c := range node.Children {
 				v.RenderTree(ctx, c)
 			}
 			nk.NkTreePop(ctx)
+		}*/
+		var img *nk.Image
+		if node.Open {
+			img = v.Icons.OpenDir
+		} else {
+			img = v.Icons.Dir
+		}
+		nk.NkLayoutRowTemplateBegin(ctx, 18)
+		nk.NkLayoutRowTemplatePushStatic(ctx, float32(18*level) + 1)
+		nk.NkLayoutRowTemplatePushStatic(ctx, 18)
+		nk.NkLayoutRowTemplatePushVariable(ctx, 100)
+		nk.NkLayoutRowTemplateEnd(ctx)
+		nk.NkLabel(ctx, "", nk.TextAlignCentered)
+		nk.NkImage(ctx, *img)
+		if nk.NkSelectText(ctx, node.Name, int32(len(node.Name)), nk.TextLeft, 0) > 0 {
+			node.Open = !node.Open
+		}
+		if node.Open {
+			level++
+			for _, c := range node.Children {
+				v.RenderTree(ctx, c, level)
+			}
 		}
 	}
 }
