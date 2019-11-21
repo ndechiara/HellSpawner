@@ -15,3 +15,6 @@ HellSpawner
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+output/
+bind_*_*.go
+imgui.ini
