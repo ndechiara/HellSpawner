@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"unsafe"
 
+	"github.com/OpenDiablo2/HellSpawner/hsapp"
+
 	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/inkyblackness/imgui-go"
 )
@@ -83,6 +85,8 @@ func (renderer *OpenGL2) Render(displaySize [2]float32, framebufferSize [2]float
 	// Setup viewport, orthographic projection matrix
 	// Our visible imgui space lies from draw_data->DisplayPos (top left) to draw_data->DisplayPos+data_data->DisplaySize (bottom right).
 	// DisplayMin is typically (0,0) for single viewport apps.
+	hsapp.WindowWidth = fbWidth
+	hsapp.WindowHeight = fbHeight
 	gl.Viewport(0, 0, int32(fbWidth), int32(fbHeight))
 	gl.MatrixMode(gl.PROJECTION)
 	gl.PushMatrix()

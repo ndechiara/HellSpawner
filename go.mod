@@ -8,9 +8,3 @@ require (
 	github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1
 	github.com/inkyblackness/imgui-go v1.10.0
 )
-
-replace github.com/OpenDiablo2/HellSpawner => C:/Users/lunat/Documents/GitHub/HellSpawner
-
-replace github.com/OpenDiablo2/OpenDiablo2 => C:/Users/lunat/Documents/GitHub/OpenDiablo2
-
-replace github.com/OpenDiablo2/D2Shared => C:/Users/lunat/Documents/GitHub/D2Shared
