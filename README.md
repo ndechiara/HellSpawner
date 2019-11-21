@@ -7,15 +7,16 @@ In the root folder, run `go get -d` to pull down all dependencies.
 To run the project, run `go run .` from the root folder.
 
 ## Build Dependencies
+Reboot after doing this to ensure environment variables are configured properly.
 ### Linux
-(Todo)
+TBD
 ### OSX
-(Todo)
+TBD
 ### Windows
 GCC is required and can be installed with [Chocolatey](https://chocolatey.org/) by executing the following command:
-
-```choco install mingw```
-
+```shell script
+choco install mingw
+```
 
 ## General Concepts
 The toolset will be used to develop games for OpenDiablo 2 (including the Diablo2 project, which will also be
