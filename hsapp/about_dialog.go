@@ -28,7 +28,7 @@ func CreateAboutDialog() *AboutDialog {
 func (v *AboutDialog) Render() {
 	t := true
 	if imgui.BeginPopupModalV(AboutDialogPopupName, &t, imgui.WindowFlagsNoResize) {
-		imgui.Image(imgui.TextureID(v.logo.GetHandle()), imgui.Vec2{256, 256})
+		imgui.Image(imgui.TextureID(v.logo.GetHandle()), imgui.Vec2{X: 256, Y: 256})
 		imgui.Separator()
 		imgui.Text("HellSpawner v0.0.1")
 		imgui.Text("https://github.com/OpenDiablo2")
