@@ -49,6 +49,8 @@ type Renderer interface {
 // Run implements the main program loop of the demo. It returns when the platform signals to stop.
 // This demo application shows some basic features of ImGui, as well as exposing the standard demo window.
 func Run(p Platform, r Renderer) {
+	Init() // call initialization of the HellSpawner system
+
 	mainWindow := CreateMainWindow()
 	imgui.CurrentIO().SetClipboard(clipboard{platform: p})
 	clearColor := [4]float32{0.1, 0.1, 0.1, 1.0}
