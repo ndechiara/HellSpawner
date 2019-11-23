@@ -14,6 +14,7 @@ import (
 type OpenFolderDialog struct {
 	PopupName  string // must have a unique popupName from other places this dialog is used
 	folderPath string
+	folderName string
 	callback   func(folderPath string)
 	folders    []os.FileInfo
 	show       bool
@@ -32,6 +33,7 @@ func CreateOpenFolderDialog(popupName string, startPath string, icons *MpqTreeIc
 }
 
 func (v *OpenFolderDialog) Render() {
+	doRefresh := false
 	if imgui.BeginPopupModalV(v.PopupName, &v.show, imgui.WindowFlagsNoResize) {
 		imgui.BeginChildV(v.PopupName + "_FoldersList", imgui.Vec2{X: 250, Y: 300}, false, imgui.WindowFlagsNoMove|imgui.WindowFlagsNoResize|imgui.WindowFlagsNoCollapse|imgui.WindowFlagsNoSavedSettings)
 		imgui.PushStyleColor(imgui.StyleColorButton, imgui.Vec4{X: 0, Y: 0, Z: 0, W: 0})
@@ -43,7 +45,7 @@ func (v *OpenFolderDialog) Render() {
 		imgui.PushStyleVarVec2(imgui.StyleVarFramePadding, imgui.Vec2{X:0,Y:0})
 		if imgui.ImageButton(opendirimg, v.Icons.Size()) {
 			v.folderPath = path.Join(v.folderPath, "..")
-			v.Refresh()
+			doRefresh = true
 		}
 		imgui.PopStyleVar()
 		imgui.PopID()
@@ -52,10 +54,10 @@ func (v *OpenFolderDialog) Render() {
 
 		imgui.SameLine()
 		imgui.PushID("uponelevelbtn")
-		imgui.PushStyleVarVec2(imgui.StyleVarFramePadding, imgui.Vec2{X:0,Y:3})
-		if imgui.Button("[Up One Level]") {
+		imgui.PushStyleVarVec2(imgui.StyleVarFramePadding, imgui.Vec2{X:1,Y:3})
+		if imgui.Button(v.folderName) {
 			v.folderPath = path.Join(v.folderPath, "..")
-			v.Refresh()
+			doRefresh = true
 		}
 		imgui.PopStyleVar()
 		imgui.PopID()
@@ -76,7 +78,7 @@ func (v *OpenFolderDialog) Render() {
 			imgui.PushStyleVarVec2(imgui.StyleVarFramePadding, imgui.Vec2{X:0,Y:0})
 			if imgui.ImageButton(dirimg, v.Icons.Size()) {
 				v.folderPath = path.Join(v.folderPath, name)
-				v.Refresh()
+				doRefresh = true
 			}
 			imgui.PopStyleVar()
 			imgui.PopID()
@@ -88,7 +90,7 @@ func (v *OpenFolderDialog) Render() {
 			imgui.PushStyleVarVec2(imgui.StyleVarFramePadding, imgui.Vec2{X:1,Y:3})
 			if imgui.Button(name) {
 				v.folderPath = path.Join(v.folderPath, name)
-				v.Refresh()
+				doRefresh = true
 			}
 			imgui.PopStyleVar()
 			imgui.PopID()
@@ -113,8 +115,10 @@ func (v *OpenFolderDialog) Render() {
 			imgui.PushStyleVarVec2(imgui.StyleVarFramePadding, imgui.Vec2{X:1,Y:3})
 			imgui.PushStyleColor(imgui.StyleColorButtonHovered, imgui.Vec4{X: 0, Y: 0, Z: 0, W: 0})
 			imgui.PushStyleColor(imgui.StyleColorButtonActive, imgui.Vec4{X: 0, Y: 0, Z: 0, W: 0})
+			imgui.PushStyleColor(imgui.StyleColorText, imgui.Vec4{X: 0.8, Y: 0.8, Z: 0.8, W: 1.0})
 			imgui.Button(folder.Name())
 			imgui.PopStyleVar()
+			imgui.PopStyleColor()
 			imgui.PopStyleColor()
 			imgui.PopStyleColor()
 		}
@@ -133,9 +137,14 @@ func (v *OpenFolderDialog) Render() {
 		}
 		imgui.EndPopup()
 	}
+
+	if doRefresh {
+		v.Refresh()
+	}
 }
 
 func (v *OpenFolderDialog) Refresh() {
+	v.folderName = filepath.Base(v.folderPath)
 	v.folders, _ = ioutil.ReadDir(v.folderPath)
 }
 
