@@ -13,7 +13,7 @@ type AboutDialog struct {
 	logo *hsutil.Texture
 }
 
-var AboutDialogPopupName = "AboutHellspawnerDialog"
+var AboutDialogPopupName = "About Hellspawner##AboutDialog"
 
 func CreateAboutDialog() *AboutDialog {
 	result := &AboutDialog{}

@@ -3,6 +3,8 @@ package hsapp
 import (
 	"os"
 
+	"github.com/OpenDiablo2/HellSpawner/hsinterface"
+
 	"github.com/inkyblackness/imgui-go"
 
 	"github.com/OpenDiablo2/HellSpawner/hsproj"
@@ -16,6 +18,7 @@ type MainWindow struct {
 	aboutDialog      *AboutDialog
 	openFolderDialog *OpenFolderDialog
 	projectTreeView  *ProjectTreeView
+	dynamicWindows   []hsinterface.UIWindow
 
 	doClose    bool
 	menuHeight int
@@ -25,11 +28,12 @@ func CreateMainWindow() *MainWindow {
 	icons := CreateMpqTreeIcons()
 
 	result := &MainWindow{
-		aboutDialog: CreateAboutDialog(),
+		aboutDialog:    CreateAboutDialog(),
+		dynamicWindows: make([]hsinterface.UIWindow, 0),
 	}
 
 	startdir, _ := os.UserHomeDir()
-	result.openFolderDialog = CreateOpenFolderDialog("Select Project Folder", startdir, icons, func(folderPath string){
+	result.openFolderDialog = CreateOpenFolderDialog("Select Project Folder", startdir, icons, func(folderPath string) {
 		hsproj.ActiveProject.PromptUnsavedChanges()
 		hsproj.ActiveProject.Close()
 
@@ -38,14 +42,12 @@ func CreateMainWindow() *MainWindow {
 			hsutil.PopupError(err)
 			return
 		}
-		
+
 		hsproj.ActiveProject = newproj
 		result.RefreshProjectLoaded()
 	})
 
-	result.projectTreeView = CreateProjectTreeView("ProjectTreeView", icons, func(filename string, mpqpath hsutil.MpqPath){
-		// do something when a file is selected
-	})
+	result.projectTreeView = CreateProjectTreeView("ProjectTreeView", icons, result)
 
 	return result
 }
@@ -57,6 +59,19 @@ func (v MainWindow) DoClose() bool {
 func (v *MainWindow) Render() {
 	v.renderMainMenu()
 	v.renderProjectTreeView()
+
+	for windowIdx := range v.dynamicWindows {
+		v.dynamicWindows[windowIdx].Render()
+	}
+
+	for windowIdx := 0; windowIdx < len(v.dynamicWindows); {
+		if v.dynamicWindows[windowIdx].IsClosed() {
+			v.dynamicWindows = append(v.dynamicWindows[:windowIdx], v.dynamicWindows[windowIdx+1:]...)
+			continue
+		}
+		windowIdx++
+	}
+
 	v.aboutDialog.Render()
 	v.openFolderDialog.Render()
 }
@@ -99,7 +114,7 @@ func (v *MainWindow) renderProjectTreeView() {
 	imgui.SetNextWindowPos(imgui.Vec2{X: 0, Y: 20})
 	imgui.SetNextWindowSize(imgui.Vec2{X: 300, Y: WindowHeight - 20})
 	if imgui.BeginV("Project Treeview", nil, imgui.WindowFlagsNoMove|imgui.WindowFlagsNoResize|imgui.WindowFlagsNoCollapse|imgui.WindowFlagsNoSavedSettings) {
-		v.projectTreeView.Render();
+		v.projectTreeView.Render()
 		imgui.End()
 	}
 	imgui.PopStyleVar()
@@ -119,4 +134,12 @@ func (v *MainWindow) renderProjectTreeView() {
 // should call sub components and ask them to refresh because a new ActiveProject was loaded
 func (v *MainWindow) RefreshProjectLoaded() {
 	v.projectTreeView.Refresh()
+}
+
+func (v *MainWindow) OnFileSelected(filename string, mpqpath hsutil.MpqPath) {
+
+}
+
+func (v *MainWindow) OnViewMpqFileDetails(mpqpath string) {
+	v.dynamicWindows = append(v.dynamicWindows, CreateMpqDetailsDialog(hsproj.ActiveProject.FolderPath+mpqpath))
 }
